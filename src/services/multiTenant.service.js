@@ -6,11 +6,7 @@ export const multiTenantService = {
         })
     },
     async create(payload) {
-        return await http.post('/api/v1/admins', payload, {
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            }
-        })
+        return await http.post('/api/v1/admins', payload)
     },
     async update(id, payload) {
         return await http.put('/api/v1/admins/' + id, payload)

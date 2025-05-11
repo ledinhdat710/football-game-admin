@@ -40,6 +40,8 @@ let state = reactive({
   email: "",
   password: "",
   store: null,
+  role: 3,
+  coin: null,
 });
 
 const refBtn = ref(null);
@@ -80,6 +82,11 @@ const cols = reactive([
     field: "Email",
     sort: "",
   },
+  {
+    name: "Role",
+    field: "Role",
+    sort: "",
+  },
 ]);
 
 const listMultiTenant = ref([]);
@@ -106,6 +113,8 @@ const handleModalForm = async () => {
   state.name = "";
   state.email = "";
   state.store = null;
+  state.role = 3;
+  state.coin = null;
   vformMultiTenant$.value.$reset();
   store.pageLoader({ mode: "on" });
   store.pageLoader({ mode: "off" });
@@ -121,6 +130,8 @@ const apiGetPrinter = async (id) => {
   const response = await multiTenantService.getDetail(id);
   state.name = response?.full_name;
   state.email = response?.email;
+  state.coin = response?.coin;
+  state.role = response?.role.id;
   vformMultiTenant$.value.$reset();
 };
 
@@ -247,11 +258,27 @@ async function onSubmitCreateMultiTenant(val) {
     if (!result) return;
     // let paramsStore = [];
     // paramsStore = state.store.map((item) => item.value);
+    const role = ref({});
+    if (state.role === 1) {
+      role.value = {
+        id: state.role,
+        name: "Admin",
+      };
+    } else {
+      role.value = {
+        id: state.role,
+        name: "User",
+      };
+    }
     let payload = {};
     payload = {
-      name: state.name,
+      full_name: state.name,
       email: state.email,
       password: state.password,
+      coin: state.coin,
+      role: role.value,
+      provider: "email",
+      turn_index: 1,
       // store_ids: JSON.stringify(paramsStore),
     };
     const response = await multiTenantService.create(payload);
@@ -260,7 +287,11 @@ async function onSubmitCreateMultiTenant(val) {
       if (!val) {
         refBtn.value.click();
       }
-      (state.name = ""), (state.email = ""), vformMultiTenant$.value.$reset();
+      (state.name = ""),
+        (state.email = ""),
+        (state.coin = null),
+        (state.role = 3),
+        vformMultiTenant$.value.$reset();
       return setNotify({
         title: "Success",
         message: "Create success",
@@ -279,9 +310,23 @@ async function onSubmitUpdateMultiTenant() {
   try {
     const result = await vformMultiTenant$.value.$validate();
     if (!result) return;
+    const role = ref();
+    if (state.role === 1) {
+      role.value = {
+        id: state.role,
+        name: "Admin",
+      };
+    } else {
+      role.value = {
+        id: state.role,
+        name: "User",
+      };
+    }
     let payload = {
-      name: state.name,
+      full_name: state.name,
       email: state.email,
+      coin: state.coin,
+      role: role.value,
     };
     const response = await multiTenantService.update(idModal.value, payload);
     if (!response?.error) {
@@ -372,6 +417,7 @@ const onCloseMultiTenant = () => {
                         <td style="min-width: 100px">{{ row?.id }}</td>
                         <td style="min-width: 150px">{{ row?.full_name }}</td>
                         <td style="min-width: 150px">{{ row?.email }}</td>
+                        <td style="min-width: 150px">{{ row?.role.name }}</td>
                         <td class="text-end">
                           <div class="btn-group">
                             <!-- <button
@@ -394,13 +440,13 @@ const onCloseMultiTenant = () => {
                             >
                               <i class="fa fa-fw fa-pencil-alt"></i>
                             </button>
-                            <button
+                            <!-- <button
                               type="button"
                               class="btn btn-sm btn-alt-secondary"
                               @click="onOpenDeleteConfirm(row?.id)"
                             >
                               <i class="fa fa-fw fa-times"></i>
-                            </button>
+                            </button> -->
                           </div>
                         </td>
                       </tr>

@@ -25,6 +25,17 @@ const onFetchListStore = async () => {
   }
 };
 
+const optionRole = ref([
+  {
+    value: 1,
+    label: "Admin",
+  },
+  {
+    value: 3,
+    label: "User",
+  },
+]);
+
 const props = defineProps(["v$", "state", "idModal"]);
 
 const { v$, state } = props;
@@ -104,6 +115,39 @@ onMounted(async () => {
                 placeholder="Enter password.."
                 autocomplete="off"
                 v-model="state.password"
+              />
+            </div>
+            <div class="mb-4">
+              <label class="form-label" for="block-form-password-id"
+                >Role <span class="text-danger">*</span></label
+              >
+              <select
+                id="val-role-id"
+                class="form-select"
+                v-model="state.role"
+                placeholder="Select "
+              >
+                <option
+                  v-for="(role, index) in optionRole"
+                  :value="role.value"
+                  :key="`role-${index}`"
+                >
+                  {{ role.label }}
+                </option>
+              </select>
+            </div>
+            <div class="mb-4" v-if="state.role === 3">
+              <label class="form-label" for="block-form-password-id"
+                >Coin <span class="text-danger"></span
+              ></label>
+              <input
+                type="number"
+                class="form-control"
+                id="block-form-coin-id"
+                name="block-form-coin-id"
+                placeholder="Enter coin.."
+                autocomplete="off"
+                v-model="state.coin"
               />
             </div>
           </div>
