@@ -55,7 +55,7 @@ async function onSubmit() {
       const _tmpUser = {
         ...response?.user,
       };
-      localStorage.setItem("user", _tmpUser);
+      localStorage.setItem("user", JSON.stringify(_tmpUser));
       localStorage.setItem("token", response.token);
       await router.push({ name: "admin-list-user" });
     }
