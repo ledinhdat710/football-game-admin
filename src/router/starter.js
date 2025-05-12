@@ -179,12 +179,12 @@ const { cookies } = useCookies()
 router.beforeEach(async (to, from, next) => {
   NProgress.start()
   const toPage = to.name
-  const cookieUserInfo = cookies.get('user')
-  const cookieToken = cookies.get('token')
+  const cookieUserInfo = localStorage.getItem('user')
+  const cookieToken = localStorage.getItem('token')
   if (!PageNoAuth.includes(toPage)) {
     if (!cookieUserInfo || !cookieToken) {
-      cookies.remove('token')
-      cookies.remove('user')
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
       resetUser()
       return next('/auth/sign-in')
     } else {

@@ -55,8 +55,8 @@ async function onSubmit() {
       const _tmpUser = {
         ...response?.user,
       };
-      cookies.set("user", _tmpUser);
-      cookies.set("token", response?.token);
+      localStorage.setItem("user", _tmpUser);
+      localStorage.setItem("token", response.token);
       await router.push({ name: "admin-list-user" });
     }
   } catch (e) {

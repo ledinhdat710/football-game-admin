@@ -13,7 +13,7 @@ const http = axios.create({
 })
 
 http.interceptors.request.use((config) => {
-    const token = cookies.get('token')
+    const token = localStorage.getItem('token')
     if (token) {
         config.headers.Authorization = `Bearer ${token}`
     }
@@ -27,7 +27,7 @@ http.interceptors.response.use((response) => {
 
     if (error.response?.status === 401) {
         response.code = error.response?.status
-        cookies.remove('token')
+        localStorage.removeItem('token')
         router.push('/auth/sign-in')
     }
     if (error.response?.status === 403) {
