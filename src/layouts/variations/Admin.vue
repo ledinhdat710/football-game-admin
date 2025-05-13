@@ -94,6 +94,12 @@ const onSignOut = () => {
                 icon: 'fa fa-user',
                 module: 'multi-tenant',
               },
+              {
+                name: 'List Code',
+                to: 'admin-list-code',
+                icon: 'fa fa-fw fa-store',
+                module: 'list-code',
+              },
               // {
               //   name: 'Kiosk Slaves',
               //   to: 'admin-kiosk-slaves-list',

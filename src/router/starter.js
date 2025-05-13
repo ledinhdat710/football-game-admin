@@ -34,6 +34,14 @@ const routes = [
         }
       },
       {
+        path: 'admin-list-code',
+        name: 'admin-list-code',
+        component: () => import('@/views/admin/Code/CodeList.vue'),
+        meta: {
+          module: 'admin-list-code'
+        }
+      },
+      {
         path: 'multi-tenant/form/:id?',
         name: 'admin-multi-tenant-form',
         component: () => import('@/views/admin/MultiTenant/MultiTenantForm.vue'),
