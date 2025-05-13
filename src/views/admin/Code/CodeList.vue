@@ -78,6 +78,11 @@ const cols = reactive([
     field: "Value",
     sort: "",
   },
+  {
+    name: "User",
+    field: "User",
+    sort: "",
+  },
 ]);
 
 const listMultiTenant = ref([]);
@@ -344,6 +349,9 @@ const onCloseMultiTenant = () => {
                         <td style="min-width: 100px">{{ row?.id }}</td>
                         <td style="min-width: 150px">{{ row?.code }}</td>
                         <td style="min-width: 150px">{{ row?.value }}</td>
+                        <td style="min-width: 150px">
+                          {{ row?.user?.full_name }}
+                        </td>
                         <!-- <td class="text-end">
                           <div class="btn-group">
                           
