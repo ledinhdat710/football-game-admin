@@ -10,7 +10,7 @@ import useVuelidate from "@vuelidate/core";
 import { required, sameAs } from "@vuelidate/validators";
 import { userService } from "@/services/user.service";
 import Swal from "sweetalert2";
-import { computed, onMounted, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref, watch } from "vue";
 import ChangePassword from "@/views/admin/MultiTenant/ChangePassword.vue";
 import {
   Dataset,
@@ -42,6 +42,7 @@ let state = reactive({
   store: null,
   role: 3,
   coin: null,
+  manager: 0,
 });
 
 const refBtn = ref(null);
@@ -78,7 +79,7 @@ const cols = reactive([
     sort: "",
   },
   {
-    name: "Email",
+    name: "User Name",
     field: "Email",
     sort: "",
   },
@@ -87,19 +88,55 @@ const cols = reactive([
     field: "Role",
     sort: "",
   },
+  {
+    name: "Số lần kích mã",
+    field: "Số lần kích mã",
+    sort: "",
+  },
+  {
+    name: "Tổng Coin được kích",
+    field: "Tổng Coin được kích",
+    sort: "",
+  },
+  {
+    name: "Số coin hiện tại",
+    field: "Số coin hiện tại",
+    sort: "",
+  },
+  {
+    name: "Thuộc manager",
+    field: "Thuộc manager",
+    sort: "",
+  },
+  {
+    name: "Last Login",
+    field: "Last Login",
+    sort: "",
+  },
 ]);
 
+const limit = ref(10);
+const visible = ref(true);
+const currentPage = ref(1);
+const totalPage = ref(1);
+const total = ref();
 const listMultiTenant = ref([]);
 const idModal = ref(null);
+watch([limit], async () => {
+  currentPage.value = 1;
+  await onFetchList();
+});
 const onFetchList = async () => {
   try {
     store.pageLoader({ mode: "on" });
     const response = await multiTenantService.getList({
-      page: 1,
-      limit: 10,
+      page: currentPage.value,
+      limit: limit.value,
     });
     if (!response?.error) {
       listMultiTenant.value = response?.data || [];
+      totalPage.value = response?.total_page;
+      total.value = response?.total;
     }
     store.pageLoader({ mode: "off" });
   } catch (error) {
@@ -115,6 +152,7 @@ const handleModalForm = async () => {
   state.store = null;
   state.role = 3;
   state.coin = null;
+  state.manager = 0;
   vformMultiTenant$.value.$reset();
   store.pageLoader({ mode: "on" });
   store.pageLoader({ mode: "off" });
@@ -132,6 +170,7 @@ const apiGetPrinter = async (id) => {
   state.email = response?.email;
   state.coin = response?.coin;
   state.role = response?.role.id;
+  state.manager = response?.admin_id;
   vformMultiTenant$.value.$reset();
 };
 
@@ -252,6 +291,8 @@ async function confirmNew(val) {
   await onSubmitCreateMultiTenant(val);
 }
 
+const formTenantRef = ref(null);
+
 async function onSubmitCreateMultiTenant(val) {
   try {
     const result = await vformMultiTenant$.value.$validate();
@@ -262,12 +303,10 @@ async function onSubmitCreateMultiTenant(val) {
     if (state.role === 1) {
       role.value = {
         id: state.role,
-        name: "Admin",
       };
     } else {
       role.value = {
         id: state.role,
-        name: "User",
       };
     }
     let payload = {};
@@ -279,11 +318,13 @@ async function onSubmitCreateMultiTenant(val) {
       role: role.value,
       provider: "email",
       turn_index: 1,
+      admin_id: state.manager,
       // store_ids: JSON.stringify(paramsStore),
     };
     const response = await multiTenantService.create(payload);
     if (!response?.error) {
       onFetchList();
+      formTenantRef.value.onFetchListAdmin();
       if (!val) {
         refBtn.value.click();
       }
@@ -291,6 +332,7 @@ async function onSubmitCreateMultiTenant(val) {
         (state.email = ""),
         (state.coin = null),
         (state.role = 3),
+        (state.manager = 0),
         vformMultiTenant$.value.$reset();
       return setNotify({
         title: "Success",
@@ -314,12 +356,10 @@ async function onSubmitUpdateMultiTenant() {
     if (state.role === 1) {
       role.value = {
         id: state.role,
-        name: "Admin",
       };
     } else {
       role.value = {
         id: state.role,
-        name: "User",
       };
     }
     let payload = {
@@ -327,10 +367,12 @@ async function onSubmitUpdateMultiTenant() {
       email: state.email,
       coin: state.coin,
       role: role.value,
+      admin_id: state.manager,
     };
     const response = await multiTenantService.update(idModal.value, payload);
     if (!response?.error) {
       onFetchList();
+      formTenantRef.value.onFetchListAdmin();
       refBtn.value.click();
       return setNotify({
         title: "Success",
@@ -392,7 +434,16 @@ const onCloseMultiTenant = () => {
         <div v-show="listMultiTenant?.length">
           <div class="row" :data-page-count="ds.dsPagecount">
             <div id="datasetLength" class="col-md-8 py-2">
-              <DatasetShow />
+              <DatasetShow v-show="false" :dsShowEntries="100" />
+              <div class="form-inline">
+                <select class="form-select" style="width: 80px" v-model="limit">
+                  <option :value="5">5</option>
+                  <option :value="10">10</option>
+                  <option :value="25">25</option>
+                  <option :value="50">50</option>
+                  <option :value="100">100</option>
+                </select>
+              </div>
             </div>
             <div class="col-md-4 py-2">
               <DatasetSearch ds-search-placeholder="Search..." />
@@ -415,9 +466,20 @@ const onCloseMultiTenant = () => {
                     <template #default="{ row }">
                       <tr>
                         <td style="min-width: 100px">{{ row?.id }}</td>
-                        <td style="min-width: 150px">{{ row?.full_name }}</td>
-                        <td style="min-width: 150px">{{ row?.email }}</td>
-                        <td style="min-width: 150px">{{ row?.role.name }}</td>
+                        <td style="min-width: 100px">{{ row?.full_name }}</td>
+                        <td style="min-width: 100px">{{ row?.email }}</td>
+                        <td style="min-width: 100px">{{ row?.role.name }}</td>
+                        <td style="min-width: 100px">
+                          {{ row?.total_deposit_time }}
+                        </td>
+                        <td style="min-width: 100px">
+                          {{ row?.total_deposit_coin }}
+                        </td>
+                        <td style="min-width: 100px">{{ row?.coin }}</td>
+                        <td style="min-width: 100px">
+                          {{ row?.admin?.full_name }}
+                        </td>
+                        <td style="min-width: 100px">{{ row?.last_login }}</td>
                         <td class="text-end">
                           <div class="btn-group">
                             <!-- <button
@@ -460,7 +522,18 @@ const onCloseMultiTenant = () => {
             class="d-flex flex-md-row flex-column justify-content-between align-items-center"
           >
             <DatasetInfo class="py-3 fs-sm" />
-            <DatasetPager class="flex-wrap py-3 fs-sm" />
+            <!-- <DatasetPager class="flex-wrap py-3 fs-sm" /> -->
+            <el-pagination
+              v-if="visible"
+              v-model:current-page="currentPage"
+              @current-change="onFetchList"
+              background
+              v-model:page-size="limit"
+              layout="prev, pager, next"
+              prev-text="Prev"
+              next-text="Next"
+              :total="total"
+            />
           </div>
         </div>
         <EListEmpty v-if="!listMultiTenant?.length" />
@@ -483,6 +556,7 @@ const onCloseMultiTenant = () => {
     >
       <template v-slot:childrenComponent>
         <ModalFormMultiTenant
+          ref="formTenantRef"
           :idModal="idModal"
           :v$="vformMultiTenant$"
           :state="state"

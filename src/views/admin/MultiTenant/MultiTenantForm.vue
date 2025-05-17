@@ -1,24 +1,24 @@
 <script setup>
 import { restaurantService } from "@/services/restaurant.service";
 import { useTemplateStore } from "@/stores/template";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, defineExpose } from "vue";
 import VueSelect from "vue-select";
+import { multiTenantService } from "@/services/multiTenant.service";
 
 const store = useTemplateStore();
 
-const optionsStore = ref([]);
-const onFetchListStore = async () => {
+const optionManager = ref([]);
+const onFetchListAdmin = async () => {
   try {
-    const response = await restaurantService.getList({
-      page: 1,
-      limit: -1,
+    const response = await multiTenantService.getList({
+      role_id: 6,
     });
-    if (!response?.error) {
-      const newArray = response.data?.data.map((item) => ({
+    if (response?.data) {
+      const newArray = response?.data.map((item) => ({
         value: item.id,
-        name: item.name,
+        name: item.full_name,
       }));
-      optionsStore.value = [...newArray];
+      optionManager.value = [...newArray];
     }
   } catch (e) {
     console.log(e);
@@ -34,6 +34,10 @@ const optionRole = ref([
     value: 3,
     label: "User",
   },
+  {
+    value: 6,
+    label: "Manager",
+  },
 ]);
 
 const props = defineProps(["v$", "state", "idModal"]);
@@ -45,12 +49,14 @@ onMounted(async () => {
     store.pageLoader({ mode: "on" });
     // await onFetchListStore();
     store.pageLoader({ mode: "off" });
+    await onFetchListAdmin();
     state.email = "";
     state.password = "";
   } catch (error) {
     store.pageLoader({ mode: "off" });
   }
 });
+defineExpose({ onFetchListAdmin });
 </script>
 
 <template>
@@ -133,6 +139,25 @@ onMounted(async () => {
                   :key="`role-${index}`"
                 >
                   {{ role.label }}
+                </option>
+              </select>
+            </div>
+            <div class="mb-4" v-if="state.role === 3">
+              <label class="form-label" for="block-form-password-id"
+                >Manager</label
+              >
+              <select
+                id="val-role-id"
+                class="form-select"
+                v-model="state.manager"
+                placeholder="Select "
+              >
+                <option
+                  v-for="(role, index) in optionManager"
+                  :value="role.value"
+                  :key="`role-${index}`"
+                >
+                  {{ role.name }}
                 </option>
               </select>
             </div>
