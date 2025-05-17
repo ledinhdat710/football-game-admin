@@ -89,7 +89,7 @@ defineExpose({ onFetchListAdmin });
             </div>
             <div class="mb-4">
               <label class="form-label" for="block-form-email-id"
-                >Email <span class="text-danger">*</span></label
+                >User Name <span class="text-danger">*</span></label
               >
               <input
                 type="text"
@@ -106,7 +106,7 @@ defineExpose({ onFetchListAdmin });
                 v-if="v$.email.$errors.length"
                 class="invalid-feedback animated fadeIn"
               >
-                Please fill email
+                Please fill user name
               </div>
             </div>
             <div class="mb-4" v-if="!idModal">
