@@ -41,7 +41,7 @@ let state = reactive({
   password: "",
   store: null,
   role: 3,
-  coin: null,
+  coin: 5,
   manager: 0,
 });
 
@@ -151,7 +151,7 @@ const handleModalForm = async () => {
   state.email = "";
   state.store = null;
   state.role = 3;
-  state.coin = null;
+  state.coin = 5;
   state.manager = 0;
   vformMultiTenant$.value.$reset();
   store.pageLoader({ mode: "on" });
@@ -330,7 +330,7 @@ async function onSubmitCreateMultiTenant(val) {
       }
       (state.name = ""),
         (state.email = ""),
-        (state.coin = null),
+        (state.coin = 5),
         (state.role = 3),
         (state.manager = 0),
         vformMultiTenant$.value.$reset();

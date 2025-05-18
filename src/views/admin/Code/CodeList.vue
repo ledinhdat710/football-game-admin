@@ -10,7 +10,7 @@ import useVuelidate from "@vuelidate/core";
 import { required, sameAs } from "@vuelidate/validators";
 import { userService } from "@/services/user.service";
 import Swal from "sweetalert2";
-import { computed, onMounted, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref, watch } from "vue";
 import ChangePassword from "@/views/admin/MultiTenant/ChangePassword.vue";
 import {
   Dataset,
@@ -85,17 +85,28 @@ const cols = reactive([
   },
 ]);
 
+const limit = ref(10);
+const visible = ref(true);
+const currentPage = ref(1);
+const totalPage = ref(1);
+const total = ref();
 const listMultiTenant = ref([]);
 const idModal = ref(null);
+watch([limit], async () => {
+  currentPage.value = 1;
+  await onFetchList();
+});
 const onFetchList = async () => {
   try {
     store.pageLoader({ mode: "on" });
     const response = await codeService.getList({
-      page: 1,
-      limit: 10,
+      page: currentPage.value,
+      limit: limit.value,
     });
     if (!response?.error) {
       listMultiTenant.value = response?.data || [];
+      totalPage.value = response?.total_page;
+      total.value = response?.total;
     }
     store.pageLoader({ mode: "off" });
   } catch (error) {
@@ -324,7 +335,16 @@ const onCloseMultiTenant = () => {
         <div v-show="listMultiTenant?.length">
           <div class="row" :data-page-count="ds.dsPagecount">
             <div id="datasetLength" class="col-md-8 py-2">
-              <DatasetShow />
+              <DatasetShow v-show="false" :dsShowEntries="100" />
+              <div class="form-inline">
+                <select class="form-select" style="width: 80px" v-model="limit">
+                  <option :value="5">5</option>
+                  <option :value="10">10</option>
+                  <option :value="25">25</option>
+                  <option :value="50">50</option>
+                  <option :value="100">100</option>
+                </select>
+              </div>
             </div>
             <div class="col-md-4 py-2">
               <DatasetSearch ds-search-placeholder="Search..." />
@@ -379,7 +399,17 @@ const onCloseMultiTenant = () => {
             class="d-flex flex-md-row flex-column justify-content-between align-items-center"
           >
             <DatasetInfo class="py-3 fs-sm" />
-            <DatasetPager class="flex-wrap py-3 fs-sm" />
+            <el-pagination
+              v-if="visible"
+              v-model:current-page="currentPage"
+              @current-change="onFetchList"
+              background
+              v-model:page-size="limit"
+              layout="prev, pager, next"
+              prev-text="Prev"
+              next-text="Next"
+              :total="total"
+            />
           </div>
         </div>
         <EListEmpty v-if="!listMultiTenant?.length" />

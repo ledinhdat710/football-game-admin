@@ -25,20 +25,32 @@ const onFetchListAdmin = async () => {
   }
 };
 
-const optionRole = ref([
-  {
-    value: 1,
-    label: "Admin",
-  },
-  {
-    value: 3,
-    label: "User",
-  },
-  {
-    value: 6,
-    label: "Manager",
-  },
-]);
+const user = JSON.parse(localStorage.getItem("user"));
+const optionRole = ref([]);
+
+if (user.role_id === 1) {
+  optionRole.value = [
+    {
+      value: 1,
+      label: "Admin",
+    },
+    {
+      value: 3,
+      label: "User",
+    },
+    {
+      value: 6,
+      label: "Manager",
+    },
+  ];
+} else {
+  optionRole.value = [
+    {
+      value: 3,
+      label: "User",
+    },
+  ];
+}
 
 const props = defineProps(["v$", "state", "idModal"]);
 
@@ -166,6 +178,7 @@ defineExpose({ onFetchListAdmin });
                 >Coin <span class="text-danger"></span
               ></label>
               <input
+                :disabled="!idModal"
                 type="number"
                 class="form-control"
                 id="block-form-coin-id"

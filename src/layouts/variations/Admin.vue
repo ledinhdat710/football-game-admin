@@ -22,6 +22,8 @@ store.setLayout({
 store.headerStyle({ mode: "light" });
 store.mainContent({ mode: "narrow" });
 const { userInfo, resetUser } = useAuth();
+const user = JSON.parse(localStorage.getItem("user"));
+// console.log(user);
 const router = useRouter();
 const { cookies } = useCookies();
 const onSignOut = () => {
@@ -67,27 +69,9 @@ const onSignOut = () => {
             </div>
           </a>
         </div>
-        <div class="px-4">
+        <div class="px-4" v-if="user.role_id === 1">
           <BaseNavigation
             :nodes="[
-              // {
-              //   name: 'Dashboard',
-              //   to: 'admin-dashboard',
-              //   icon: 'fa fa-home',
-              //   module: 'dashboard',
-              // },
-              // {
-              //   name: 'Restaurants',
-              //   to: 'admin-restaurants-list',
-              //   icon: 'fa fa-bell-concierge',
-              //   module: 'restaurants',
-              // },
-              // {
-              //   name: 'Announcement',
-              //   to: 'admin-announcement-list',
-              //   icon: 'fa fa-bell',
-              //   module: 'announcement',
-              // },
               {
                 name: 'List User',
                 to: 'admin-list-user',
@@ -100,18 +84,18 @@ const onSignOut = () => {
                 icon: 'fa fa-fw fa-store',
                 module: 'list-code',
               },
-              // {
-              //   name: 'Kiosk Slaves',
-              //   to: 'admin-kiosk-slaves-list',
-              //   icon: 'fa fa-fw fa-store',
-              //   module: 'kiosk-slaves',
-              // },
-              // {
-              //   name: 'Printer Slaves',
-              //   to: 'admin-printer-slaves-list',
-              //   icon: 'fa fa-solid fa-print',
-              //   module: 'printer-slaves',
-              // },
+            ]"
+          />
+        </div>
+        <div class="px-4" v-else>
+          <BaseNavigation
+            :nodes="[
+              {
+                name: 'List User',
+                to: 'admin-list-user',
+                icon: 'fa fa-user',
+                module: 'multi-tenant',
+              },
             ]"
           />
         </div>
