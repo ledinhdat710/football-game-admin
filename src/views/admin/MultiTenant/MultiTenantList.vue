@@ -43,6 +43,7 @@ let state = reactive({
   role: 3,
   coin: 5,
   manager: 0,
+  is_active: 1,
 });
 
 const refBtn = ref(null);
@@ -153,6 +154,7 @@ const handleModalForm = async () => {
   state.role = 3;
   state.coin = 5;
   state.manager = 0;
+  state.is_active = 1;
   vformMultiTenant$.value.$reset();
   store.pageLoader({ mode: "on" });
   store.pageLoader({ mode: "off" });
@@ -171,6 +173,7 @@ const apiGetPrinter = async (id) => {
   state.coin = response?.coin;
   state.role = response?.role.id;
   state.manager = response?.admin_id;
+  state.is_active = response?.is_active;
   vformMultiTenant$.value.$reset();
 };
 
@@ -209,17 +212,16 @@ async function onSubmitPassword() {
     const result = await vChangePassword$.value.$validate();
     if (!result) return;
     let payload = {
-      new_password: stateChangePassword.newPassword,
-      new_password_confirmation: stateChangePassword.confirmPassword,
-      user_id: idMultiTenant.value,
+      password: stateChangePassword.newPassword,
     };
+    const response = await multiTenantService.update(idModal.value, payload);
 
-    const response = await userService.changePassword(payload);
-    if (!response?.error) {
+    if (response) {
       refBtnPassword.value.click();
+      onFetchList();
       return setNotify({
         title: "Success",
-        message: response?.message,
+        message: "Update Password Success",
         type: "success",
       });
     }
@@ -319,6 +321,7 @@ async function onSubmitCreateMultiTenant(val) {
       provider: "email",
       turn_index: 1,
       admin_id: state.manager,
+      is_active: state.is_active,
       // store_ids: JSON.stringify(paramsStore),
     };
     const response = await multiTenantService.create(payload);
@@ -333,6 +336,7 @@ async function onSubmitCreateMultiTenant(val) {
         (state.coin = 5),
         (state.role = 3),
         (state.manager = 0),
+        (state.is_active = 1),
         vformMultiTenant$.value.$reset();
       return setNotify({
         title: "Success",
@@ -368,6 +372,7 @@ async function onSubmitUpdateMultiTenant() {
       coin: state.coin,
       role: role.value,
       admin_id: state.manager,
+      is_active: state.is_active,
     };
     const response = await multiTenantService.update(idModal.value, payload);
     if (!response?.error) {
@@ -482,7 +487,7 @@ const onCloseMultiTenant = () => {
                         <td style="min-width: 100px">{{ row?.last_login }}</td>
                         <td class="text-end">
                           <div class="btn-group">
-                            <!-- <button
+                            <button
                               type="button"
                               data-bs-toggle="modal"
                               data-bs-target="#modal-change-password-multi-tenant"
@@ -491,7 +496,7 @@ const onCloseMultiTenant = () => {
                               @click="() => handleModalChangePassword(row?.id)"
                             >
                               <i class="fa fa-fw fa-rotate"></i>
-                            </button> -->
+                            </button>
                             <button
                               type="button"
                               data-bs-toggle="modal"

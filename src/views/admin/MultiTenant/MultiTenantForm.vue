@@ -56,6 +56,12 @@ const props = defineProps(["v$", "state", "idModal"]);
 
 const { v$, state } = props;
 
+const isActive = ref(false);
+const changeActive = () => {
+  isActive.value = !isActive.value;
+  state.is_active = isActive.value ? 1 : 0;
+};
+
 onMounted(async () => {
   try {
     store.pageLoader({ mode: "on" });
@@ -187,6 +193,17 @@ defineExpose({ onFetchListAdmin });
                 autocomplete="off"
                 v-model="state.coin"
               />
+            </div>
+            <div class="mb-4">
+              <label class="form-label" for="val-type">Active User</label>
+              <div class="form-check form-switch">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  @change="changeActive"
+                  :checked="state.is_active === 1 ? true : false"
+                />
+              </div>
             </div>
           </div>
         </div>
