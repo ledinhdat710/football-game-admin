@@ -58,8 +58,8 @@ const { v$, state } = props;
 
 const isActive = ref(false);
 const changeActive = () => {
-  isActive.value = !isActive.value;
-  state.is_active = isActive.value ? 1 : 0;
+  state.isActive = !state.isActive;
+  state.is_active = state.isActive ? 1 : 0;
 };
 
 onMounted(async () => {

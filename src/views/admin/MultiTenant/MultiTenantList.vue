@@ -44,6 +44,7 @@ let state = reactive({
   coin: 5,
   manager: 0,
   is_active: 1,
+  isActive: true,
 });
 
 const refBtn = ref(null);
@@ -155,6 +156,7 @@ const handleModalForm = async () => {
   state.coin = 5;
   state.manager = 0;
   state.is_active = 1;
+  state.isActive = true;
   vformMultiTenant$.value.$reset();
   store.pageLoader({ mode: "on" });
   store.pageLoader({ mode: "off" });
@@ -174,6 +176,7 @@ const apiGetPrinter = async (id) => {
   state.role = response?.role.id;
   state.manager = response?.admin_id;
   state.is_active = response?.is_active;
+  state.isActive = response?.is_active === 1 ? true : false;
   vformMultiTenant$.value.$reset();
 };
 
