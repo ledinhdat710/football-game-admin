@@ -26,6 +26,11 @@ function eventHeaderSearch(event) {
   }
 }
 
+function logOut() {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+}
+
 // Attach ESCAPE key event listener
 onMounted(() => {
   document.addEventListener("keydown", eventHeaderSearch);
@@ -122,11 +127,11 @@ onUnmounted(() => {
                   <div
                     class="p-3 text-center bg-body-light border-bottom rounded-top"
                   >
-                    <img
+                    <!-- <img
                       class="img-avatar img-avatar48 img-avatar-thumb"
                       src="/assets/media/avatars/avatar10.jpg"
                       alt="Header Avatar"
-                    />
+                    /> -->
                     <p class="mt-2 mb-0 fw-medium">John Smith</p>
                     <p class="mb-0 text-muted fs-sm fw-medium">Web Developer</p>
                   </div>
@@ -164,7 +169,9 @@ onUnmounted(() => {
                       :to="{ name: 'auth-signin' }"
                       class="dropdown-item d-flex align-items-center justify-content-between"
                     >
-                      <span class="fs-sm fw-medium">Log Out</span>
+                      <span @click="logOut" class="fs-sm fw-medium"
+                        >Log Out</span
+                      >
                     </RouterLink>
                   </div>
                 </div>

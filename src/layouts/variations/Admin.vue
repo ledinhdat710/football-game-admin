@@ -30,6 +30,8 @@ const onSignOut = () => {
   resetUser();
   cookies.remove("token");
   cookies.remove("user");
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
   router.push({ name: "admin-auth-signin" });
 };
 </script>

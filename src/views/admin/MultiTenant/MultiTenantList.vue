@@ -86,8 +86,8 @@ const cols = reactive([
     sort: "",
   },
   {
-    name: "Role",
-    field: "Role",
+    name: "Active",
+    field: "Active",
     sort: "",
   },
   {
@@ -396,6 +396,25 @@ async function onSubmitUpdateMultiTenant() {
   }
 }
 
+const formatDateTime = (input) => {
+  if (!input) {
+    return "";
+  }
+  const date = new Date(input);
+
+  if (isNaN(date.getTime())) return "Invalid date";
+
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const seconds = String(date.getSeconds()).padStart(2, "0");
+
+  return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+};
+
 const onCloseMultiTenant = () => {
   vformMultiTenant$.value.$reset();
 };
@@ -476,7 +495,9 @@ const onCloseMultiTenant = () => {
                         <td style="min-width: 100px">{{ row?.id }}</td>
                         <td style="min-width: 100px">{{ row?.full_name }}</td>
                         <td style="min-width: 100px">{{ row?.email }}</td>
-                        <td style="min-width: 100px">{{ row?.role.name }}</td>
+                        <td style="min-width: 100px">
+                          {{ row?.is_active === 1 ? "Hoạt động" : "Không" }}
+                        </td>
                         <td style="min-width: 100px">
                           {{ row?.total_deposit_time }}
                         </td>
@@ -487,7 +508,9 @@ const onCloseMultiTenant = () => {
                         <td style="min-width: 100px">
                           {{ row?.admin?.full_name }}
                         </td>
-                        <td style="min-width: 100px">{{ row?.last_login }}</td>
+                        <td style="min-width: 100px">
+                          {{ formatDateTime(row?.last_login) }}
+                        </td>
                         <td class="text-end">
                           <div class="btn-group">
                             <button
