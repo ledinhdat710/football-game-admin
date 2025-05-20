@@ -115,6 +115,30 @@ const onFetchList = async () => {
   }
 };
 
+const fileInput = ref(null);
+const handleUpload = async () => {
+  fileInput.value.click();
+};
+const handleFileChange = async (event) => {
+  const file = event.target.files[0];
+  const formData = new FormData();
+  formData.append("file", file);
+  let payload;
+  payload = formData;
+
+  try {
+    store.pageLoader({ mode: "on" });
+    const response = await codeService.import(payload);
+    if (response) {
+      onFetchList();
+    }
+    store.pageLoader({ mode: "off" });
+  } catch (e) {
+    console.log(e);
+    store.pageLoader({ mode: "off" });
+  }
+};
+
 const handleModalForm = async () => {
   idModal.value = undefined;
   state.code = "";
@@ -304,6 +328,7 @@ const onCloseMultiTenant = () => {
       <div class="flex flex-col">
         <div class="d-flex justify-content-end mb-2">
           <EButton
+            style="margin-right: 10px"
             type="info"
             size="sm"
             data-bs-toggle="modal"
@@ -312,6 +337,15 @@ const onCloseMultiTenant = () => {
             @click="() => handleModalForm()"
             ><i class="fa fa-plus opacity-50 me-1"></i> New Code</EButton
           >
+          <EButton type="info" size="sm" @click="() => handleUpload()"
+            ><i class="fa fa-plus opacity-50 me-1"></i> Upload Code</EButton
+          >
+          <input
+            ref="fileInput"
+            type="file"
+            style="display: none"
+            @change="handleFileChange($event)"
+          />
         </div>
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb breadcrumb-alt">

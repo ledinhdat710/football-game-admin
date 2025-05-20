@@ -20,5 +20,13 @@ export const codeService = {
 
     async loginStore(id) {
         return await http.get(`/store-login/${id}`)
-    }
+    },
+
+    async import(payload) {
+        return await http.post('/api/v1/admins/import-code', payload, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        })
+    },
 }

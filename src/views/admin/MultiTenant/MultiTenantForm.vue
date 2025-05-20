@@ -67,14 +67,14 @@ onMounted(async () => {
     store.pageLoader({ mode: "on" });
     // await onFetchListStore();
     store.pageLoader({ mode: "off" });
-    await onFetchListAdmin();
+    // await onFetchListAdmin();
     state.email = "";
     state.password = "";
   } catch (error) {
     store.pageLoader({ mode: "off" });
   }
 });
-defineExpose({ onFetchListAdmin });
+defineExpose({ onFetchListAdmin, optionManager });
 </script>
 
 <template>

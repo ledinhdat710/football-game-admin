@@ -35,6 +35,7 @@ const store = useTemplateStore();
 const { setNotify } = useNotify();
 const route = useRoute();
 const id = route.params?.id;
+const searchManager = ref(0);
 let state = reactive({
   name: "",
   email: "",
@@ -128,13 +129,27 @@ watch([limit], async () => {
   currentPage.value = 1;
   await onFetchList();
 });
+watch([searchManager], async () => {
+  currentPage.value = 1;
+  await onFetchList();
+});
 const onFetchList = async () => {
   try {
     store.pageLoader({ mode: "on" });
-    const response = await multiTenantService.getList({
-      page: currentPage.value,
-      limit: limit.value,
-    });
+    let payload;
+    if (searchManager.value) {
+      payload = {
+        page: currentPage.value,
+        limit: limit.value,
+        admin_id: searchManager.value,
+      };
+    } else {
+      payload = {
+        page: currentPage.value,
+        limit: limit.value,
+      };
+    }
+    const response = await multiTenantService.getList(payload);
     if (!response?.error) {
       listMultiTenant.value = response?.data || [];
       totalPage.value = response?.total_page;
@@ -239,10 +254,15 @@ async function onSubmitPassword() {
 const onCloseChangePassword = () => {
   vChangePassword$.value.$reset();
 };
-
+const listManager = ref([]);
 onMounted(async () => {
   await onFetchList();
-
+  await formTenantRef.value.onFetchListAdmin();
+  console.log(formTenantRef.value.optionManager);
+  listManager.value = [
+    { value: 0, name: "Tất cả" },
+    ...formTenantRef.value.optionManager,
+  ];
   // Remove labels from
   document.querySelectorAll("#datasetLength label").forEach((el) => {
     el.remove();
@@ -458,9 +478,9 @@ const onCloseMultiTenant = () => {
         :ds-data="listMultiTenant"
         :ds-search-in="['id', 'name', 'email']"
       >
-        <div v-show="listMultiTenant?.length">
+        <div>
           <div class="row" :data-page-count="ds.dsPagecount">
-            <div id="datasetLength" class="col-md-8 py-2">
+            <div id="datasetLength" class="col-md-4 py-2">
               <DatasetShow v-show="false" :dsShowEntries="100" />
               <div class="form-inline">
                 <select class="form-select" style="width: 80px" v-model="limit">
@@ -471,6 +491,22 @@ const onCloseMultiTenant = () => {
                   <option :value="100">100</option>
                 </select>
               </div>
+            </div>
+            <div class="col-md-4 py-2">
+              <select
+                id="val-manager-id"
+                class="form-select"
+                v-model="searchManager"
+                placeholder="Select "
+              >
+                <option
+                  v-for="(role, index) in listManager"
+                  :value="role.value"
+                  :key="`role-${index}`"
+                >
+                  {{ role.name }}
+                </option>
+              </select>
             </div>
             <div class="col-md-4 py-2">
               <DatasetSearch ds-search-placeholder="Search..." />
